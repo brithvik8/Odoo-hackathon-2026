@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitOps – Smart Transport Operations Platform (Odoo Hackathon)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen flex flex-col">
+
+    <header class="bg-slate-800 border-b border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-50 shadow-md">
+        <div class="flex items-center gap-3">
+            <span class="text-xl font-extrabold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                TransitOps 🚛
+            </span>
+            <span class="text-xs bg-slate-700 text-slate-300 px-2 py-0.5 rounded font-mono">Odoo ERP Build</span>
+        </div>
+
+        <div class="flex items-center gap-2">
+            <span class="text-xs text-slate-400 font-medium">Active RBAC Role:</span>
+            <select id="roleSelector" onchange="switchRole(this.value)" class="bg-slate-900 border border-emerald-500/50 rounded-lg text-emerald-400 font-bold text-xs px-3 py-1.5 focus:outline-none">
+                <option value="manager">🛠️ Fleet Manager (Full Assets & Ops)</option>
+                <option value="driver">🚚 Driver / Dispatcher (Trips & Dispatch)</option>
+                <option value="safety">🛡️ Safety Officer (Compliance & Licenses)</option>
+                <option value="finance">📊 Financial Analyst (Expenses & ROI)</option>
+            </select>
+        </div>
+    </header>
+
+    <section class="p-6 bg-slate-900/50 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">Active Fleet</p>
+                <h3 id="kpiTotalVehicles" class="text-2xl font-bold text-white mt-1">0</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">Available Vehicles</p>
+                <h3 id="kpiAvailableVehicles" class="text-2xl font-bold text-emerald-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">In Maintenance</p>
+                <h3 id="kpiInShopVehicles" class="text-2xl font-bold text-amber-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">Active Trips</p>
+                <h3 id="kpiActiveTrips" class="text-2xl font-bold text-cyan-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">Drivers On Duty</p>
+                <h3 id="kpiDriversOnDuty" class="text-2xl font-bold text-purple-400 mt-1">0</h3>
+            </div>
+            <div class="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p class="text-[11px] text-slate-400 uppercase font-semibold">Fleet Utilization</p>
+                <h3 id="kpiUtilization" class="text-2xl font-bold text-emerald-400 mt-1">0%</h3>
+            </div>
+        </div>
+    </section>
+
+    <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <div class="lg:col-span-1 space-y-6">
+            
+            <div id="panelVehicle" class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>➕ Register Vehicle</span>
+                </h3>
+                <form onsubmit="addVehicle(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Registration No (Unique)</label>
+                        <input type="text" id="vehReg" placeholder="e.g. Van-05 or TS 08 HK 2058" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white font-mono uppercase focus:border-emerald-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Model / Name</label>
+                            <input type="text" id="vehModel" placeholder="Volvo FH16" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Type</label>
+                            <select id="vehType" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                                <option>Truck</option><option>Van</option><option>Bus</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Max Load Capacity (kg)</label>
+                            <input type="number" id="vehCap" placeholder="500" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Acquisition Cost ($)</label>
+                            <input type="number" id="vehCost" placeholder="50000" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-emerald-500">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2 rounded transition">
+                        Save to Vehicle Registry
+                    </button>
+                </form>
+            </div>
+
+            <div id="panelDriver" class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-purple-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>👤 Register Driver Profile</span>
+                </h3>
+                <form onsubmit="addDriver(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Driver Name</label>
+                        <input type="text" id="drvName" placeholder="Alex" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white focus:border-purple-500">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">License Number</label>
+                            <input type="text" id="drvLic" placeholder="DL-99482" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white font-mono uppercase">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">License Expiry Date</label>
+                            <input type="date" id="drvExp" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-purple-600 hover:bg-purple-500 text-white font-bold py-2 rounded transition">
+                        Save Driver Profile
+                    </button>
+                </form>
+            </div>
+
+            <div id="panelTrip" class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>🚀 Dispatch New Trip</span>
+                </h3>
+                <form onsubmit="dispatchTrip(event)" class="space-y-3 text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Source</label>
+                            <input type="text" id="tripSrc" placeholder="Warehouse A" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Destination</label>
+                            <input type="text" id="tripDest" placeholder="Port B" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Select Available Vehicle</label>
+                            <select id="tripVeh" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white"></select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Select Available Driver</label>
+                            <select id="tripDrv" required class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white"></select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Cargo Weight (kg)</label>
+                            <input type="number" id="tripWeight" placeholder="450" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Planned Distance (km)</label>
+                            <input type="number" id="tripDist" placeholder="120" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                    </div>
+                    <div id="dispatchError" class="text-rose-400 text-xs font-semibold hidden bg-rose-950/40 p-2 rounded border border-rose-800"></div>
+                    <button type="submit" class="w-full bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-2.5 rounded transition shadow-lg shadow-cyan-600/20">
+                        Validate & Dispatch Trip
+                    </button>
+                </form>
+            </div>
+
+            <div id="panelLog" class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-4">
+                <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider flex items-center gap-2">
+                    <span>🔧 Maintenance & Fuel Log</span>
+                </h3>
+                <form onsubmit="addLog(event)" class="space-y-3 text-xs">
+                    <div>
+                        <label class="block text-slate-400 mb-1">Select Vehicle</label>
+                        <select id="logVeh" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white"></select>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-slate-400 mb-1">Log Type</label>
+                            <select id="logType" class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                                <option value="fuel">⛽ Fuel Log</option>
+                                <option value="maint">🔧 Maintenance (Sets In Shop)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-slate-400 mb-1">Cost ($)</label>
+                            <input type="number" id="logCost" placeholder="350" required
+                                class="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-white">
+                        </div>
+                    </div>
+                    <button type="submit" class="w-full bg-amber-600 hover:bg-amber-500 text-white font-bold py-2 rounded transition">
+                        Submit Log Record
+                    </button>
+                </form>
+            </div>
+
+        </div>
+
+        <div class="lg:col-span-2 space-y-6">
+            
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-3">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">📍 Active Trip Lifecycle Management</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[10px]">
+                            <tr>
+                                <th class="p-2.5">Trip ID</th>
+                                <th class="p-2.5">Route</th>
+                                <th class="p-2.5">Vehicle</th>
+                                <th class="p-2.5">Driver</th>
+                                <th class="p-2.5">Cargo</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-right">Lifecycle Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableTrips" class="divide-y divide-slate-700 font-mono">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-3">
+                <div class="flex justify-between items-center">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider">🚛 Vehicle Registry & Financial ROI Analytics</h3>
+                    <button onclick="exportCSV()" class="bg-slate-700 hover:bg-slate-600 text-white text-[10px] px-3 py-1.5 rounded font-semibold transition">
+                        📥 Export CSV
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[10px]">
+                            <tr>
+                                <th class="p-2.5">Reg No</th>
+                                <th class="p-2.5">Model</th>
+                                <th class="p-2.5">Capacity</th>
+                                <th class="p-2.5">Ops Cost</th>
+                                <th class="p-2.5">Revenue</th>
+                                <th class="p-2.5">ROI %</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-right">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableVehicles" class="divide-y divide-slate-700 font-mono">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700 shadow-xl space-y-3">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wider">🛡️ Driver Compliance & Safety Roster</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-900 text-slate-400 uppercase font-mono text-[10px]">
+                            <tr>
+                                <th class="p-2.5">Name</th>
+                                <th class="p-2.5">License No</th>
+                                <th class="p-2.5">Expiry Date</th>
+                                <th class="p-2.5">Safety Score</th>
+                                <th class="p-2.5">Status</th>
+                                <th class="p-2.5 text-right">Compliance Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableDrivers" class="divide-y divide-slate-700 font-mono">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <script>
+        // 1. INITIAL MASTER DATA (Loaded with Odoo Workflow Example Step 1 & 2)
+        let vehicles = [
+            { reg: "VAN-05", model: "Ford Transit", type: "Van", cap: 500, odo: 12000, cost: 30000, status: "Available", opsCost: 200, revenue: 1500 },
+            { reg: "TS-08-HK-2058", model: "Tata Signa Truck", type: "Truck", cap: 15000, odo: 84000, cost: 85000, status: "Available", opsCost: 1200, revenue: 8400 },
+            { reg: "MH-01-AB-1234", model: "Ashok Leyland Bus", type: "Bus", cap: 3500, odo: 45000, cost: 60000, status: "In Shop", opsCost: 800, revenue: 3100 }
+        ];
+
+        let drivers = [
+            { name: "Alex", lic: "DL-10029", exp: "2028-10-15", score: 98, status: "Available" },
+            { name: "Rajesh Kumar", lic: "DL-88392", exp: "2029-05-20", score: 92, status: "Available" },
+            { name: "Vikram Singh", lic: "DL-44019", exp: "2023-01-01", score: 65, status: "Suspended" } // Expired license example
+        ];
+
+        let trips = [
+            { id: "TRIP-101", src: "Hyderabad", dest: "Bangalore", veh: "TS-08-HK-2058", drv: "Rajesh Kumar", weight: 12000, dist: 570, status: "Dispatched" }
+        ];
+
+        // Ensure state consistency on load
+        vehicles.find(v => v.reg === "TS-08-HK-2058").status = "On Trip";
+        drivers.find(d => d.name === "Rajesh Kumar").status = "On Trip";
+
+        // 2. CORE RENDER & VALIDATION ENGINE
+        function renderAll() {
+            renderKPIs();
+            renderVehicles();
+            renderDrivers();
+            renderTrips();
+            populateSelectDropdowns();
+        }
+
+        function renderKPIs() {
+            document.getElementById('kpiTotalVehicles').innerText = vehicles.length;
+            document.getElementById('kpiAvailableVehicles').innerText = vehicles.filter(v => v.status === "Available").length;
+            document.getElementById('kpiInShopVehicles').innerText = vehicles.filter(v => v.status === "In Shop").length;
+            document.getElementById('kpiActiveTrips').innerText = trips.filter(t => t.status === "Dispatched").length;
+            document.getElementById('kpiDriversOnDuty').innerText = drivers.filter(d => d.status === "On Trip").length;
+            
+            const util = vehicles.length ? Math.round((vehicles.filter(v => v.status === "On Trip").length / vehicles.length) * 100) : 0;
+            document.getElementById('kpiUtilization').innerText = `${util}%`;
+        }
+
+        function renderVehicles() {
+            const tbody = document.getElementById('tableVehicles');
+            tbody.innerHTML = '';
+            vehicles.forEach(v => {
+                // Official Odoo ROI Formula: [Revenue - (Maintenance + Fuel)] / Acquisition Cost
+                const roi = v.cost > 0 ? (((v.revenue - v.opsCost) / v.cost) * 100).toFixed(1) : 0;
+                let badge = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if (v.status === "On Trip") badge = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+                if (v.status === "In Shop") badge = "bg-amber-500/10 text-amber-400 border-amber-500/20";
+                if (v.status === "Retired") badge = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5 font-bold text-white">${v.reg}</td>
+                        <td class="p-2.5">${v.model}</td>
+                        <td class="p-2.5">${v.cap} kg</td>
+                        <td class="p-2.5 text-amber-400">$${v.opsCost}</td>
+                        <td class="p-2.5 text-emerald-400">$${v.revenue}</td>
+                        <td class="p-2.5 font-bold ${roi >= 0 ? 'text-emerald-400' : 'text-rose-400'}">${roi}%</td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${v.status}</span></td>
+                        <td class="p-2.5 text-right">
+                            ${v.status === "In Shop" ? `<button onclick="closeMaintenance('${v.reg}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded text-[10px]">✓ Close Maint</button>` : ''}
+                            ${v.status !== "Retired" ? `<button onclick="retireVehicle('${v.reg}')" class="text-rose-400 hover:underline ml-2 text-[10px]">Retire</button>` : ''}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderDrivers() {
+            const tbody = document.getElementById('tableDrivers');
+            tbody.innerHTML = '';
+            const today = new Date().toISOString().split('T')[0];
+
+            drivers.forEach(d => {
+                const isExpired = d.exp < today;
+                if (isExpired && d.status !== "Suspended") d.status = "Suspended"; // Rule: Expired license = cannot assign
+
+                let badge = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if (d.status === "On Trip") badge = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+                if (d.status === "Suspended") badge = "bg-rose-500/10 text-rose-400 border-rose-500/20";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5 font-bold text-white">${d.name}</td>
+                        <td class="p-2.5">${d.lic}</td>
+                        <td class="p-2.5 ${isExpired ? 'text-rose-500 font-bold' : ''}">${d.exp} ${isExpired ? '(EXPIRED)' : ''}</td>
+                        <td class="p-2.5 font-bold">${d.score}/100</td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${d.status}</span></td>
+                        <td class="p-2.5 text-right">
+                            <button onclick="toggleSuspend('${d.lic}')" class="text-xs ${d.status === 'Suspended' ? 'text-emerald-400' : 'text-rose-400'} hover:underline">
+                                ${d.status === 'Suspended' ? 'Reinstate' : 'Suspend'}
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function renderTrips() {
+            const tbody = document.getElementById('tableTrips');
+            tbody.innerHTML = '';
+            trips.forEach(t => {
+                let badge = "bg-cyan-500/10 text-cyan-400 border-cyan-500/20";
+                if (t.status === "Completed") badge = "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
+                if (t.status === "Cancelled") badge = "bg-slate-500/10 text-slate-400 border-slate-500/20";
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="p-2.5 font-bold text-white">${t.id}</td>
+                        <td class="p-2.5">${t.src} ➔ ${t.dest}</td>
+                        <td class="p-2.5 text-emerald-400 font-bold">${t.veh}</td>
+                        <td class="p-2.5 text-purple-400">${t.drv}</td>
+                        <td class="p-2.5">${t.weight} kg</td>
+                        <td class="p-2.5"><span class="px-2 py-0.5 rounded text-[10px] border ${badge}">${t.status}</span></td>
+                        <td class="p-2.5 text-right space-x-1">
+                            ${t.status === "Dispatched" ? `
+                                <button onclick="completeTrip('${t.id}')" class="bg-emerald-600 hover:bg-emerald-500 text-white px-2 py-1 rounded text-[10px]">✓ Complete</button>
+                                <button onclick="cancelTrip('${t.id}')" class="bg-rose-600 hover:bg-rose-500 text-white px-2 py-1 rounded text-[10px]">✕ Cancel</button>
+                            ` : `<span class="text-slate-500 text-[10px]">Archived</span>`}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function populateSelectDropdowns() {
+            // Rule: Only "Available" vehicles and drivers appear in dispatch selection pool!
+            const vehSelect = document.getElementById('tripVeh');
+            const drvSelect = document.getElementById('tripDrv');
+            const logVehSelect = document.getElementById('logVeh');
+
+            vehSelect.innerHTML = '<option value="">-- Select Available Vehicle --</option>';
+            drvSelect.innerHTML = '<option value="">-- Select Available Driver --</option>';
+            logVehSelect.innerHTML = '';
+
+            vehicles.forEach(v => {
+                if (v.status === "Available") {
+                    vehSelect.innerHTML += `<option value="${v.reg}">${v.reg} (${v.model} - Cap: ${v.cap}kg)</option>`;
+                }
+                if (v.status !== "Retired") {
+                    logVehSelect.innerHTML += `<option value="${v.reg}">${v.reg} (${v.status})</option>`;
+                }
+            });
+
+            drivers.forEach(d => {
+                if (d.status === "Available") {
+                    drvSelect.innerHTML += `<option value="${d.name}">${d.name} (Lic: ${d.lic})</option>`;
+                }
+            });
+        }
+
+        // 3. ACTIONS & WORKFLOW STATE MACHINE
+        function addVehicle(e) {
+            e.preventDefault();
+            const reg = document.getElementById('vehReg').value.toUpperCase();
+            if (vehicles.some(v => v.reg === reg)) {
+                alert("❌ Rule Violation: Vehicle Registration Number must be unique!");
+                return;
+            }
+            vehicles.push({
+                reg: reg,
+                model: document.getElementById('vehModel').value,
+                type: document.getElementById('vehType').value,
+                cap: parseInt(document.getElementById('vehCap').value),
+                odo: 0,
+                cost: parseInt(document.getElementById('vehCost').value),
+                status: "Available",
+                opsCost: 0,
+                revenue: 0
+            });
+            e.target.reset();
+            renderAll();
+        }
+
+        function addDriver(e) {
+            e.preventDefault();
+            drivers.push({
+                name: document.getElementById('drvName').value,
+                lic: document.getElementById('drvLic').value.toUpperCase(),
+                exp: document.getElementById('drvExp').value,
+                score: 100,
+                status: "Available"
+            });
+            e.target.reset();
+            renderAll();
+        }
+
+        function dispatchTrip(e) {
+            e.preventDefault();
+            const errDiv = document.getElementById('dispatchError');
+            errDiv.classList.add('hidden');
+
+            const vehReg = document.getElementById('tripVeh').value;
+            const drvName = document.getElementById('tripDrv').value;
+            const weight = parseInt(document.getElementById('tripWeight').value);
+            const dist = parseInt(document.getElementById('tripDist').value);
+
+            const veh = vehicles.find(v => v.reg === vehReg);
+            const drv = drivers.find(d => d.name === drvName);
+
+            // Mandatory Business Rule Validation: Cargo <= Max Load Capacity
+            if (weight > veh.cap) {
+                errDiv.innerText = `❌ Dispatch Failed: Cargo Weight (${weight}kg) exceeds vehicle capacity (${veh.cap}kg)!`;
+                errDiv.classList.remove('hidden');
+                return;
+            }
+
+            // Execute Workflow Step 5: Switch both vehicle and driver status to On Trip
+            veh.status = "On Trip";
+            drv.status = "On Trip";
+
+            trips.unshift({
+                id: `TRIP-${Math.floor(100 + Math.random() * 900)}`,
+                src: document.getElementById('tripSrc').value,
+                dest: document.getElementById('tripDest').value,
+                veh: veh.reg,
+                drv: drv.name,
+                weight: weight,
+                dist: dist,
+                status: "Dispatched"
+            });
+
+            e.target.reset();
+            renderAll();
+        }
+
+        function completeTrip(tripId) {
+            const trip = trips.find(t => t.id === tripId);
+            trip.status = "Completed";
+
+            // Execute Workflow Step 7: Restore both vehicle and driver to Available
+            const veh = vehicles.find(v => v.reg === trip.veh);
+            const drv = drivers.find(d => d.name === trip.drv);
+            if (veh) {
+                veh.status = "Available";
+                veh.revenue += (trip.dist * 4); // Simulate revenue generated per km
+            }
+            if (drv) drv.status = "Available";
+
+            renderAll();
+        }
+
+        function cancelTrip(tripId) {
+            const trip = trips.find(t => t.id === tripId);
+            trip.status = "Cancelled";
+
+            // Restore statuses
+            const veh = vehicles.find(v => v.reg === trip.veh);
+            const drv = drivers.find(d => d.name === trip.drv);
+            if (veh) veh.status = "Available";
+            if (drv) drv.status = "Available";
+
+            renderAll();
+        }
+
+        function addLog(e) {
+            e.preventDefault();
+            const vehReg = document.getElementById('logVeh').value;
+            const type = document.getElementById('logType').value;
+            const cost = parseInt(document.getElementById('logCost').value);
+
+            const veh = vehicles.find(v => v.reg === vehReg);
+            veh.opsCost += cost;
+
+            // Execute Workflow Step 8: Adding active maintenance automatically switches status to In Shop
+            if (type === "maint") {
+                veh.status = "In Shop";
+                alert(`🔧 Maintenance logged for ${veh.reg}. Status automatically switched to 'In Shop' and removed from driver dispatch pool!`);
+            }
+            e.target.reset();
+            renderAll();
+        }
+
+        function closeMaintenance(reg) {
+            const veh = vehicles.find(v => v.reg === reg);
+            veh.status = "Available";
+            renderAll();
+        }
+
+        function retireVehicle(reg) {
+            if (confirm(`Are you sure you want to retire ${reg}? It will be permanently removed from dispatch.`)) {
+                vehicles.find(v => v.reg === reg).status = "Retired";
+                renderAll();
+            }
+        }
+
+        function toggleSuspend(lic) {
+            const drv = drivers.find(d => d.lic === lic);
+            drv.status = (drv.status === "Suspended") ? "Available" : "Suspended";
+            renderAll();
+        }
+
+        function switchRole(role) {
+            // Simple visual filtering to simulate RBAC permissions
+            document.getElementById('panelVehicle').style.display = (role === 'manager') ? 'block' : 'none';
+            document.getElementById('panelDriver').style.display = (role === 'manager' || role === 'safety') ? 'block' : 'none';
+            document.getElementById('panelTrip').style.display = (role === 'manager' || role === 'driver') ? 'block' : 'none';
+            document.getElementById('panelLog').style.display = (role === 'manager' || role === 'finance') ? 'block' : 'none';
+        }
+
+        function exportCSV() {
+            let csv = "Registration No,Model,Type,Capacity (kg),Operational Cost ($),Revenue ($),ROI %,Status\n";
+            vehicles.forEach(v => {
+                const roi = v.cost > 0 ? (((v.revenue - v.opsCost) / v.cost) * 100).toFixed(1) : 0;
+                csv += `${v.reg},${v.model},${v.type},${v.cap},${v.opsCost},${v.revenue},${roi}%,${v.status}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.setAttribute('hidden', '');
+            a.setAttribute('href', url);
+            a.setAttribute('download', 'TransitOps_Fleet_ROI_Report.csv');
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+
+        // Initialize UI
+        renderAll();
+        switchRole('manager');
+    </script>
+</body>
+</html>

@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TransitOps – Smart Transport Platform (India)</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Leaflet CSS & JS for real interactive maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <style>
+        #map { height: 100%; width: 100%; z-index: 10; }
+        .pulse-marker {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 8px rgba(0,0,0,0.5);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans h-screen flex flex-col overflow-hidden">
+
+    <!-- ================= 1. LOGIN + CAPTCHA MODAL ================= -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-md p-8 rounded-2xl shadow-2xl">
+            <div class="flex items-center gap-3 mb-6">
+                <div class="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-xl text-emerald-400">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">TransitOps India</h2>
+                    <p class="text-xs text-slate-400">Smart Transport Operations Platform</p>
+                </div>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Vehicle / Reg No.</label>
+                    <input type="text" id="regNo" value="TS 08 HK 2058" required
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-medium text-slate-400 uppercase mb-1">Select Access Role</label>
+                    <select id="loginRole" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-emerald-500 transition">
+                        <option value="admin">Dispatcher / Ops Admin</option>
+                        <option value="passenger">Passenger / Commuter View</option>
+                    </select>
+                </div>
+
+                <!-- Math CAPTCHA -->
+                <div class="p-4 bg-slate-900/60 border border-slate-700/60 rounded-xl space-y-2">
+                    <label class="block text-xs font-medium text-slate-400 uppercase">Security Verification</label>
+                    <div class="flex items-center gap-3">
+                        <span id="captchaQuestion" class="bg-slate-800 px-3 py-2 rounded-lg font-mono font-bold text-emerald-400 tracking-wider"></span>
+                        <span class="text-slate-400 font-bold">=</span>
+                        <input type="number" id="captchaInput" placeholder="Enter sum" required
+                            class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono focus:outline-none focus:border-emerald-500 transition">
+                        <button type="button" onclick="generateCaptcha()" class="p-2 text-slate-400 hover:text-white transition" title="Refresh CAPTCHA">
+                            🔄
+                        </button>
+                    </div>
+                    <p id="captchaError" class="text-xs text-rose-500 hidden font-medium">Incorrect CAPTCHA answer. Please try again.</p>
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-3 rounded-xl transition shadow-lg shadow-emerald-600/20">
+                    Access Platform
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ================= 2. MAIN APPLICATION HEADER ================= -->
+    <header class="h-16 border-b border-slate-800 bg-slate-900/50 px-6 flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-4">
+            <span class="font-bold text-lg tracking-tight bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+                TransitOps 🇮🇳
+            </span>
+            <span id="userBadge" class="text-xs bg-slate-800 border border-slate-700 px-2.5 py-1 rounded-full text-slate-300 font-mono"></span>
+        </div>
+
+        <!-- Role Switcher Toggle -->
+        <div class="flex bg-slate-800 p-1 rounded-xl border border-slate-700">
+            <button onclick="switchRole('admin')" id="btnAdmin" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition bg-emerald-600 text-white shadow">
+                🛡️ Admin Dashboard
+            </button>
+            <button onclick="switchRole('passenger')" id="btnPassenger" class="px-4 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white">
+                📱 Passenger App
+            </button>
+        </div>
+
+        <!-- AI Simulation Stress Controls -->
+        <div class="flex items-center gap-3 text-xs">
+            <span class="text-slate-400 font-medium">Inject Friction:</span>
+            <button onclick="triggerFriction('traffic')" class="bg-amber-500/10 border border-amber-500/20 text-amber-400 px-3 py-1.5 rounded-lg hover:bg-amber-500/20 transition">
+                ⚠️ Heavy Traffic
+            </button>
+            <button onclick="triggerFriction('storm')" class="bg-rose-500/10 border border-rose-500/20 text-rose-400 px-3 py-1.5 rounded-lg hover:bg-rose-500/20 transition">
+                ⛈️ Monsoon Storm
+            </button>
+            <button onclick="resetFriction()" class="bg-slate-800 border border-slate-700 text-slate-300 px-3 py-1.5 rounded-lg hover:bg-slate-700 transition">
+                🔄 Normal
+            </button>
+        </div>
+    </header>
+
+    <!-- ================= 3. MAIN WORKSPACE (MAP + PANELS) ================= -->
+    <div class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left Sidebar: Admin Controls / Telemetry Table -->
+        <aside id="adminPanel" class="w-96 border-r border-slate-800 bg-slate-900 p-6 flex flex-col gap-6 overflow-y-auto shrink-0 transition-all">
+            <!-- Global Fleet Health -->
+            <div>
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">India Fleet Overview</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
+                        <span class="text-2xl font-bold text-emerald-400">98.4%</span>
+                        <p class="text-[10px] text-slate-400">On-Time Efficiency</p>
+                    </div>
+                    <div class="bg-slate-800/50 border border-slate-700/50 p-3 rounded-xl">
+                        <span id="activeCount" class="text-2xl font-bold text-cyan-400">3</span>
+                        <p class="text-[10px] text-slate-400">Active Corridors</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Route Optimization Demo Card -->
+            <div id="aiCard" class="bg-slate-800 border border-slate-700 p-4 rounded-xl space-y-3 relative overflow-hidden">
+                <div class="flex justify-between items-start">
+                    <span class="text-xs font-bold text-cyan-400 uppercase tracking-wider">AI Delay Prediction Model</span>
+                    <span id="aiConfidence" class="text-[10px] bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20">94% Conf.</span>
+                </div>
+                <p id="aiStatusText" class="text-xs text-slate-300 leading-relaxed">
+                    System operating at optimal baseline. No severe network bottlenecks detected across national highways.
+                </p>
+                <div id="aiMetrics" class="text-[11px] font-mono text-slate-400 bg-slate-900 p-2.5 rounded-lg space-y-1">
+                    <div class="flex justify-between"><span>Weather Penalty:</span><span id="metricWeather">0.0x</span></div>
+                    <div class="flex justify-between"><span>Traffic Density:</span><span id="metricTraffic">Normal (1.0x)</span></div>
+                    <div class="flex justify-between font-bold text-white"><span>Net ETA Variance:</span><span id="metricEta">+0 mins</span></div>
+                </div>
+                <button id="btnOptimize" onclick="runOptimization()" disabled
+                    class="w-full bg-slate-700 text-slate-400 py-2 rounded-lg text-xs font-semibold transition cursor-not-allowed">
+                    ✨ Optimize Corridor Route
+                </button>
+            </div>
+
+            <!-- Live Telemetry List -->
+            <div class="flex-1">
+                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Live Telemetry Feed</h3>
+                <div id="telemetryList" class="space-y-2.5 font-mono text-xs">
+                    <!-- Populated by Javascript -->
+                </div>
+            </div>
+        </aside>
+
+        <!-- Left Sidebar Alternative: Passenger View -->
+        <aside id="passengerPanel" class="w-96 border-r border-slate-800 bg-slate-900 p-6 flex flex-col gap-6 overflow-y-auto shrink-0 hidden">
+            <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-5 rounded-2xl text-white shadow-lg">
+                <span class="text-[10px] font-bold uppercase tracking-widest bg-black/20 px-2 py-1 rounded">Live Commuter Feed</span>
+                <h2 class="text-xl font-bold mt-2">Hyderabad Express</h2>
+                <p class="text-xs text-emerald-100 font-mono mt-0.5">Vehicle: TS 08 HK 2058</p>
+            </div>
+
+            <div class="bg-slate-800 border border-slate-700 p-5 rounded-2xl space-y-4">
+                <div class="flex justify-between items-baseline border-b border-slate-700 pb-4">
+                    <span class="text-xs text-slate-400">Next Stop ETA</span>
+                    <span id="passEta" class="text-3xl font-extrabold text-emerald-400">4 min</span>
+                </div>
+
+                <!-- Next Stops Timeline -->
+                <div class="space-y-3 pt-1">
+                    <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0 animate-pulse"></div>
+                        <div class="text-xs">
+                            <p class="font-bold text-white">Secunderabad Junction</p>
+                            <p class="text-[10px] text-slate-400">Current Position • Speed: <span id="passSpeed">42</span> km/h</p>
+                        </div>
+                    </div>
+                    <div class="w-0.5 h-4 bg-slate-700 ml-1"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-600 shrink-0"></div>
+                        <div class="text-xs">
+                            <p class="font-medium text-slate-300">Begumpet Transit Hub</p>
+                            <p class="text-[10px] text-slate-500">Arriving in approx. 12 mins</p>
+                        </div>
+                    </div>
+                    <div class="w-0.5 h-4 bg-slate-700 ml-1"></div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-2.5 h-2.5 rounded-full bg-slate-600 shrink-0"></div>
+                        <div class="text-xs">
+                            <p class="font-medium text-slate-300">HITEC City Cyber Towers</p>
+                            <p class="text-[10px] text-slate-500">Final Destination</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Passenger SOS Button -->
+            <button onclick="alert('🆘 SOS Alert broadcasted to Dispatcher with live GPS coordinates!')" 
+                class="mt-auto w-full bg-rose-600 hover:bg-rose-500 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-rose-600/20 flex items-center justify-center gap-2">
+                <span>🚨 Emergency SOS Broadcast</span>
+            </button>
+        </aside>
+
+        <!-- CENTER: INTERACTIVE INDIA MAP -->
+        <div class="flex-1 h-full relative">
+            <div id="map"></div>
+            
+            <!-- Map Overlay Legend -->
+            <div class="absolute bottom-6 right-6 z-[400] bg-slate-900/90 border border-slate-700 backdrop-blur p-3 rounded-xl shadow-xl text-[11px] space-y-2">
+                <div class="font-bold text-slate-300 uppercase text-[10px] mb-1">Live Corridors</div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-emerald-500 inline-block"></span> <span>TS 08 HK 2058 (Hyderabad Corridor)</span></div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-cyan-500 inline-block"></span> <span>MH 01 AB 1234 (Mumbai Expressway)</span></div>
+                <div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full bg-purple-500 inline-block"></span> <span>DL 01 AA 0001 (Delhi Metro Feeder)</span></div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ================= 4. JAVASCRIPT ENGINE ================= -->
+    <script>
+        /* --- A. CAPTCHA & LOGIN ENGINE --- */
+        let captchaAns = 0;
+        function generateCaptcha() {
+            const num1 = Math.floor(Math.random() * 9) + 1;
+            const num2 = Math.floor(Math.random() * 9) + 1;
+            captchaAns = num1 + num2;
+            document.getElementById('captchaQuestion').innerText = `${num1} + ${num2}`;
+        }
+        generateCaptcha();
+
+        function handleLogin(e) {
+            e.preventDefault();
+            const input = parseInt(document.getElementById('captchaInput').value);
+            const reg = document.getElementById('regNo').value;
+            const role = document.getElementById('loginRole').value;
+
+            if (input !== captchaAns) {
+                document.getElementById('captchaError').classList.remove('hidden');
+                generateCaptcha();
+                document.getElementById('captchaInput').value = '';
+                return;
+            }
+
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('userBadge').innerText = `${reg} (${role.toUpperCase()})`;
+            switchRole(role);
+        }
+
+        /* --- B. ROLE SWITCHER --- */
+        function switchRole(role) {
+            const adminBtn = document.getElementById('btnAdmin');
+            const passBtn = document.getElementById('btnPassenger');
+            const adminPanel = document.getElementById('adminPanel');
+            const passPanel = document.getElementById('passengerPanel');
+
+            if (role === 'admin') {
+                adminBtn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition bg-emerald-600 text-white shadow";
+                passBtn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white";
+                adminPanel.classList.remove('hidden');
+                passPanel.classList.add('hidden');
+            } else {
+                passBtn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition bg-emerald-600 text-white shadow";
+                adminBtn.className = "px-4 py-1.5 rounded-lg text-xs font-semibold transition text-slate-400 hover:text-white";
+                passPanel.classList.remove('hidden');
+                adminPanel.classList.add('hidden');
+                // Auto-zoom map to passenger's vehicle (Hyderabad)
+                map.flyTo([17.4399, 78.4983], 13, { duration: 1.5 });
+            }
+        }
+
+        /* --- C. MAP INIT & PRECISE INDIA COORDINATES --- */
+        // Initialize map centered on India
+        const map = L.map('map', { zoomControl: false }).setView([20.5937, 78.9629], 5);
+        L.control.zoom({ position: 'bottomleft' }).addTo(map);
+
+        // Dark mode cartography layer (CartoDB Dark Matter)
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; OpenStreetMap &copy; CARTO',
+            subdomains: 'abcd',
+            maxZoom: 19
+        }).addTo(map);
+
+        // Fleet Data Array with Precise Indian GPS Routes
+        const fleet = [
+            {
+                id: "TS 08 HK 2058",
+                city: "Hyderabad Corridor",
+                color: "#10b981", // Emerald
+                speed: 45,
+                delay: 0,
+                status: "Optimal",
+                // Waypoints looping between Secunderabad, Begumpet, and HITEC City
+                waypoints: [
+                    [17.4399, 78.4983], [17.4410, 78.4860], [17.4435, 78.4710], 
+                    [17.4470, 78.4500], [17.4500, 78.4300], [17.4470, 78.4500],
+                    [17.4435, 78.4710], [17.4410, 78.4860]
+                ],
+                currentIndex: 0,
+                marker: null,
+                polyline: null
+            },
+            {
+                id: "MH 01 AB 1234",
+                city: "Mumbai Expressway",
+                color: "#06b6d4", // Cyan
+                speed: 60,
+                delay: 0,
+                status: "Optimal",
+                // Mumbai Coastal loop
+                waypoints: [
+                    [18.9220, 72.8347], [18.9389, 72.8258], [18.9647, 72.8115], 
+                    [19.0178, 72.8478], [18.9647, 72.8115], [18.9389, 72.8258]
+                ],
+                currentIndex: 0,
+                marker: null,
+                polyline: null
+            },
+            {
+                id: "DL 01 AA 0001",
+                city: "Delhi Metro Feeder",
+                color: "#a855f7", // Purple
+                speed: 38,
+                delay: 0,
+                status: "Optimal",
+                // Connaught Place to India Gate loop
+                waypoints: [
+                    [28.6315, 77.2167], [28.6210, 77.2200], [28.6129, 77.2295], 
+                    [28.6000, 77.2300], [28.6129, 77.2295], [28.6210, 77.2200]
+                ],
+                currentIndex: 0,
+                marker: null,
+                polyline: null
+            }
+        ];
+
+        // Draw corridors and place markers
+        fleet.forEach(veh => {
+            veh.polyline = L.polyline(veh.waypoints, { color: veh.color, weight: 3, opacity: 0.4, dashArray: '5, 5' }).addTo(map);
+            
+            const customIcon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class="pulse-marker" style="background-color: ${veh.color};"></div>`,
+                iconSize: [14, 14],
+                iconAnchor: [7, 7]
+            });
+
+            veh.marker = L.marker(veh.waypoints[0], { icon: customIcon }).addTo(map)
+                .bindPopup(`<b>${veh.id}</b><br>${veh.city}<br>Status: ${veh.status}`);
+        });
+
+        /* --- D. REAL-TIME TELEMETRY & GPS SIMULATION LOOP --- */
+        function updateTelemetryUI() {
+            const container = document.getElementById('telemetryList');
+            container.innerHTML = '';
+
+            fleet.forEach(veh => {
+                const badgeColor = veh.delay > 0 ? 'text-amber-400 bg-amber-500/10 border-amber-500/20' : 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20';
+                container.innerHTML += `
+                    <div class="bg-slate-800/60 border border-slate-700/60 p-3 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-white flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full" style="background-color: ${veh.color};"></span>
+                                ${veh.id}
+                            </div>
+                            <div class="text-[10px] text-slate-400">${veh.city} • ${veh.speed} km/h</div>
+                        </div>
+                        <div class="text-right">
+                            <span class="text-[10px] px-2 py-0.5 rounded border ${badgeColor} font-semibold">
+                                ${veh.delay > 0 ? `+${veh.delay}m Delay` : 'On Time'}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            // Sync Passenger View data with Hyderabad bus
+            const hydBus = fleet[0];
+            document.getElementById('passSpeed').innerText = hydBus.speed;
+            document.getElementById('passEta').innerText = hydBus.delay > 0 ? `${4 + hydBus.delay} min` : `4 min`;
+        }
+
+        // Loop every 2 seconds to move vehicles to next waypoint
+        setInterval(() => {
+            fleet.forEach(veh => {
+                veh.currentIndex = (veh.currentIndex + 1) % veh.waypoints.length;
+                const nextCoords = veh.waypoints[veh.currentIndex];
+                veh.marker.setLatLng(nextCoords);
+            });
+            updateTelemetryUI();
+        }, 2000);
+
+        updateTelemetryUI();
+
+        /* --- E. AI DELAY PREDICTION & ROUTE OPTIMIZATION --- */
+        let currentFriction = 'none';
+
+        function triggerFriction(type) {
+            currentFriction = type;
+            const hydBus = fleet[0]; // Apply delay to user's vehicle
+            const aiCard = document.getElementById('aiCard');
+            const btnOpt = document.getElementById('btnOptimize');
+
+            if (type === 'traffic') {
+                hydBus.speed = 18;
+                hydBus.delay = 14;
+                hydBus.status = "Bottleneck Delay";
+                
+                aiCard.className = "bg-amber-950/30 border border-amber-500/50 p-4 rounded-xl space-y-3 relative overflow-hidden transition-all";
+                document.getElementById('aiConfidence').innerText = "89% Conf.";
+                document.getElementById('aiConfidence').className = "text-[10px] bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30 font-bold";
+                document.getElementById('aiStatusText').innerText = "CRITICAL: Severe congestion detected on Secunderabad-Begumpet corridor. Average speed degraded by 60%.";
+                
+                document.getElementById('metricWeather').innerText = "1.0x (Clear)";
+                document.getElementById('metricTraffic').innerText = "2.8x (Severe)";
+                document.getElementById('metricEta').innerText = "+14 mins";
+                document.getElementById('metricEta').className = "text-amber-400 font-bold";
+
+                btnOpt.disabled = false;
+                btnOpt.className = "w-full bg-gradient-to-r from-amber-500 to-emerald-600 hover:from-amber-400 hover:to-emerald-500 text-white py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-amber-500/20 animate-pulse cursor-pointer";
+            } 
+            else if (type === 'storm') {
+                hydBus.speed = 22;
+                hydBus.delay = 25;
+                hydBus.status = "Weather Anomaly";
+
+                aiCard.className = "bg-rose-950/30 border border-rose-500/50 p-4 rounded-xl space-y-3 relative overflow-hidden transition-all";
+                document.getElementById('aiConfidence').innerText = "96% Conf.";
+                document.getElementById('aiConfidence').className = "text-[10px] bg-rose-500/20 text-rose-300 px-2 py-0.5 rounded border border-rose-500/30 font-bold";
+                document.getElementById('aiStatusText').innerText = "EMERGENCY: Monsoon flooding alert. Waterlogging reported across Begumpet underpass. Immediate rerouting advised.";
+                
+                document.getElementById('metricWeather').innerText = "3.5x (Storm)";
+                document.getElementById('metricTraffic').innerText = "1.4x (Mod)";
+                document.getElementById('metricEta').innerText = "+25 mins";
+                document.getElementById('metricEta').className = "text-rose-400 font-bold";
+
+                btnOpt.disabled = false;
+                btnOpt.className = "w-full bg-gradient-to-r from-rose-500 to-emerald-600 hover:from-rose-400 hover:to-emerald-500 text-white py-2 rounded-lg text-xs font-bold transition shadow-lg shadow-rose-500/20 animate-pulse cursor-pointer";
+            }
+            updateTelemetryUI();
+        }
+
+        function resetFriction() {
+            currentFriction = 'none';
+            const hydBus = fleet[0];
+            hydBus.speed = 45;
+            hydBus.delay = 0;
+            hydBus.status = "Optimal";
+
+            const aiCard = document.getElementById('aiCard');
+            const btnOpt = document.getElementById('btnOptimize');
+
+            aiCard.className = "bg-slate-800 border border-slate-700 p-4 rounded-xl space-y-3 relative overflow-hidden transition-all";
+            document.getElementById('aiConfidence').innerText = "94% Conf.";
+            document.getElementById('aiConfidence').className = "text-[10px] bg-cyan-500/10 text-cyan-300 px-2 py-0.5 rounded border border-cyan-500/20";
+            document.getElementById('aiStatusText').innerText = "System operating at optimal baseline. No severe network bottlenecks detected across national highways.";
+            
+            document.getElementById('metricWeather').innerText = "0.0x";
+            document.getElementById('metricTraffic').innerText = "Normal (1.0x)";
+            document.getElementById('metricEta').innerText = "+0 mins";
+            document.getElementById('metricEta').className = "text-white font-bold";
+
+            btnOpt.disabled = true;
+            btnOpt.className = "w-full bg-slate-700 text-slate-400 py-2 rounded-lg text-xs font-semibold transition cursor-not-allowed";
+            updateTelemetryUI();
+        }
+
+        function runOptimization() {
+            const hydBus = fleet[0];
+            // Swap waypoints to an alternate bypass expressway
+            hydBus.waypoints = [
+                [17.4399, 78.4983], [17.4550, 78.4800], [17.4600, 78.4600], 
+                [17.4500, 78.4300], [17.4600, 78.4600], [17.4550, 78.4800]
+            ];
+            hydBus.polyline.setLatLngs(hydBus.waypoints);
+            hydBus.polyline.setStyle({ color: '#34d399', dashArray: null, weight: 4 }); // Bright glowing green
+            
+            // Revert speeds
+            hydBus.speed = 52;
+            hydBus.delay = 2; // Reduced delay
+            hydBus.status = "Rerouted (Bypass Active)";
+
+            // Update AI UI
+            document.getElementById('aiStatusText').innerText = "SUCCESS: Corridor optimized! Vehicle rerouted via Northern Bypass Expressway. Saved 23 minutes of idling time.";
+            document.getElementById('metricEta').innerText = "+2 mins (Optimized)";
+            document.getElementById('metricEta').className = "text-emerald-400 font-bold";
+            
+            const btnOpt = document.getElementById('btnOptimize');
+            btnOpt.disabled = true;
+            btnOpt.innerText = "✓ Bypass Corridor Established";
+            btnOpt.className = "w-full bg-emerald-950 border border-emerald-500/50 text-emerald-400 py-2 rounded-lg text-xs font-bold transition cursor-not-allowed";
+
+            updateTelemetryUI();
+            alert("✨ AI Route Optimizer executed! Notice the vehicle path shift on the map to avoid the bottleneck.");
+        }
+    </script>
+</body>
+</html>

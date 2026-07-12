@@ -1,636 +1,69 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-
+<meta charset="UTF-8">
 <title>TransitOps Vehicle Registry</title>
-
-
 <style>
-
-
-*{
-
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Segoe UI',sans-serif;
-
-}
-
-
-
-body{
-
-background:#0f172a;
-
-color:white;
-
-padding:30px;
-
-}
-
-
-
-
-.header{
-
-display:flex;
-
-justify-content:space-between;
-
-align-items:center;
-
-}
-
-
-
-.header h1{
-
-color:#00ffcc;
-
-}
-
-
-
-
-.container{
-
-margin-top:30px;
-
-display:grid;
-
-grid-template-columns:350px 1fr;
-
-gap:25px;
-
-}
-
-
-
-
-.card{
-
-background:#1e293b;
-
-padding:25px;
-
-border-radius:20px;
-
-box-shadow:0 10px 30px black;
-
-}
-
-
-
-
-label{
-
-display:block;
-
-margin-top:15px;
-
-}
-
-
-
-input,select{
-
-width:100%;
-
-padding:12px;
-
-margin-top:8px;
-
-border-radius:10px;
-
-border:none;
-
-}
-
-
-
-
-button{
-
-
-margin-top:20px;
-
-padding:12px;
-
-width:100%;
-
-border:none;
-
-border-radius:20px;
-
-background:#00ffcc;
-
-font-weight:bold;
-
-cursor:pointer;
-
-
-}
-
-
-
-
-.search{
-
-margin-bottom:20px;
-
-}
-
-
-
-
-table{
-
-width:100%;
-
-border-collapse:collapse;
-
-}
-
-
-
-th{
-
-background:#00ffcc;
-
-color:#003333;
-
-padding:12px;
-
-}
-
-
-
-td{
-
-padding:12px;
-
-border-bottom:1px solid #334155;
-
-text-align:center;
-
-}
-
-
-
-.status{
-
-padding:6px 12px;
-
-border-radius:20px;
-
-background:#22c55e;
-
-color:black;
-
-font-weight:bold;
-
-}
-
-
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:#0f172a;color:#fff}
+.sidebar{position:fixed;width:250px;height:100vh;background:#111827;padding:25px}
+.logo{text-align:center;margin-bottom:30px}.logo h2{color:#00ffcc}
+.menu button{width:100%;padding:14px;margin:8px 0;background:#1f2937;color:#fff;border:none;border-radius:10px;text-align:left;cursor:pointer}
+.menu button:hover,.active{background:#00ffcc;color:#003333}
+.main{margin-left:250px;padding:30px}
+.header{display:flex;justify-content:space-between;align-items:center}
+.add{background:#00ffcc;color:#003333;border:none;padding:12px 20px;border-radius:20px;cursor:pointer}
+input{width:100%;padding:12px;margin:20px 0;border:none;border-radius:10px}
+table{width:100%;border-collapse:collapse;background:#1e293b;border-radius:12px;overflow:hidden}
+th{background:#00ffcc;color:#003333;padding:12px}
+td{padding:12px;border-bottom:1px solid #334155;text-align:center}
 </style>
-
-
 </head>
-
-
-
-
 <body>
-
-
-
-<div class="header">
-
-<h1>
-🚍 Vehicle Registry
-</h1>
-
-
-<p>
-TransitOps Fleet Management
-</p>
-
-
-</div>
-
-
-
-
-
-<div class="container">
-
-
-
-<!-- Add Vehicle -->
-
-<div class="card">
-
-
-<h2>
-Add Vehicle
-</h2>
-
-
-
-<label>
-Registration Number
-</label>
-
-<input id="reg"
-placeholder="TS 08 HK 2058">
-
-
-
-<label>
-Vehicle Model
-</label>
-
-<input id="model"
-placeholder="Ashok Leyland">
-
-
-
-<label>
-Vehicle Type
-</label>
-
-
-<select id="type">
-
-<option>
-Bus
-</option>
-
-<option>
-Truck
-</option>
-
-<option>
-Van
-</option>
-
-</select>
-
-
-
-
-<label>
-Capacity
-</label>
-
-<input id="capacity"
-placeholder="50 Seats / 5000 Kg">
-
-
-
-
-
-<label>
-Fuel Type
-</label>
-
-
-<select id="fuel">
-
-<option>
-Diesel
-</option>
-
-<option>
-Electric
-</option>
-
-<option>
-CNG
-</option>
-
-</select>
-
-
-
-
-
-<label>
-Status
-</label>
-
-
-<select id="status">
-
-
-<option>
-Available
-</option>
-
-
-<option>
-On Trip
-</option>
-
-
-<option>
-In Shop
-</option>
-
-
-<option>
-Retired
-</option>
-
-
-</select>
-
-
-
-
-
-<button onclick="addVehicle()">
-
-Add Vehicle
-
-</button>
-
-
-</div>
-
-
-
-
-
-
-
-<!-- Vehicle List -->
-
-
-<div class="card">
-
-
-<h2>
-Vehicle List
-</h2>
-
-
-
-<br>
-
-
-<input class="search"
-id="search"
-placeholder="Search vehicle number..."
-onkeyup="searchVehicle()">
-
-
-
-
-
+<div class="sidebar">
+<div class="logo"><h1>🚍</h1><h2>TransitOps</h2></div>
+<div class="menu">
+<button onclick="location.href='dashboard.html'">📊 Dashboard</button>
+<button class="active">🚍 Vehicle Registry</button>
+<button onclick="location.href='driverprofile.html'">👨‍✈️ Driver Profiles</button>
+<button onclick="location.href='trip dispatcher.html'">🗺 Trip Dispatcher</button>
+<button onclick="location.href='maintenance.html'">🔧 Maintenance</button>
+<button onclick="location.href='fuel expenses.html'">⛽ Fuel & Expenses</button>
+<button onclick="location.href='reports.html'">📈 Reports</button>
+<button onclick="location.href='settings.html'">⚙ Settings</button>
+</div></div>
+<div class="main">
+<div class="header"><div><h1>Vehicle Registry</h1><p>Manage Fleet Vehicles</p></div><button class="add" onclick="addVehicle()">+ Add Vehicle</button></div>
+<input id="search" onkeyup="searchVehicle()" placeholder="Search Registration Number">
 <table>
-
-
-<thead>
-
-<tr>
-
-<th>
-Registration
-</th>
-
-
-<th>
-Model
-</th>
-
-
-<th>
-Type
-</th>
-
-
-<th>
-Capacity
-</th>
-
-
-<th>
-Status
-</th>
-
-
-</tr>
-
-
-</thead>
-
-
-<tbody id="vehicleTable">
-
-
-</tbody>
-
-
+<thead><tr><th>Registration</th><th>Model</th><th>Type</th><th>Capacity</th><th>Fuel</th><th>Status</th></tr></thead>
+<tbody id="vehicleTable"></tbody>
 </table>
-
-
-
 </div>
-
-
-
-
-</div>
-
-
-
-
-
-
-
 <script>
-
-
-
 let vehicles=[
-
-
-{
-
-reg:"TS 08 HK 2058",
-
-model:"Ashok Leyland",
-
-type:"Bus",
-
-capacity:"50 Seats",
-
-status:"On Trip"
-
-},
-
-
-{
-
-reg:"AP 09 XY 4521",
-
-model:"Tata Truck",
-
-type:"Truck",
-
-capacity:"5000 Kg",
-
-status:"Available"
-
-}
-
-
+{reg:"TS 08 HK 2058",model:"Ashok Leyland",type:"Bus",capacity:"50 Seats",fuel:"Diesel",status:"On Trip"},
+{reg:"AP 09 XY 4521",model:"Tata Truck",type:"Truck",capacity:"5000 Kg",fuel:"Diesel",status:"Available"}
 ];
-
-
-
-
-
-function displayVehicles(data=vehicles){
-
-
-let table="";
-
-
-data.forEach(v=>{
-
-
-table+=`
-
-<tr>
-
-<td>${v.reg}</td>
-
-<td>${v.model}</td>
-
-<td>${v.type}</td>
-
-<td>${v.capacity}</td>
-
-<td>
-
-<span class="status">
-
-${v.status}
-
-</span>
-
-</td>
-
-
-</tr>
-
-`;
-
-
-
-});
-
-
-
-document.getElementById("vehicleTable")
-.innerHTML=table;
-
-
+function display(data=vehicles){
+document.getElementById("vehicleTable").innerHTML=data.map(v=>`<tr><td>${v.reg}</td><td>${v.model}</td><td>${v.type}</td><td>${v.capacity}</td><td>${v.fuel}</td><td>${v.status}</td></tr>`).join("");
 }
-
-
-
-displayVehicles();
-
-
-
-
-
-
-
+display();
 function addVehicle(){
-
-
-
-let vehicle={
-
-
-reg:reg.value,
-
-model:model.value,
-
-type:type.value,
-
-capacity:capacity.value,
-
-status:status.value
-
-
-};
-
-
-
-
-vehicles.push(vehicle);
-
-
-
-displayVehicles();
-
-
-
-alert(
-"Vehicle Added Successfully"
-);
-
-
-
+let reg=prompt("Registration Number");
+if(!reg)return;
+let model=prompt("Model");
+let type=prompt("Type");
+let cap=prompt("Capacity");
+let fuel=prompt("Fuel");
+let status=prompt("Status");
+vehicles.push({reg:reg,model:model,type:type,capacity:cap,fuel:fuel,status:status});
+display();
 }
-
-
-
-
-
-
-
-
 function searchVehicle(){
-
-
-
-let value=
-search.value.toLowerCase();
-
-
-
-let result=
-vehicles.filter(v=>
-
-v.reg.toLowerCase()
-.includes(value)
-
-);
-
-
-
-displayVehicles(result);
-
-
-
+let s=document.getElementById("search").value.toLowerCase();
+display(vehicles.filter(v=>v.reg.toLowerCase().includes(s)));
 }
-
-
-
-
 </script>
-
-
-
 </body>
-
-
 </html>

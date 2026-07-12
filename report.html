@@ -129,92 +129,57 @@ background:#00c58d;
 
 <h2>🚍 TransitOps</h2>
 
-<button>Dashboard</button>
-<button>Vehicle Registry</button>
+<a href="dashboard.html">
+    <button type="button">Dashboard</button>
+</a>
+<a href="vehicle registry.html">
+    <button type="button">Vehicle Registry</button>
+</a>
 <button>Drivers</button>
 <button>Trip Dispatcher</button>
 <button>Maintenance</button>
 <button>Fuel & Expenses</button>
-<button style="background:#00E5A8;color:black;">Reports</button>
+<a href="reports.html">
+    <button style="background:#00E5A8;color:black;" type="button">Reports</button>
+</a>
+
 <button>Settings</button>
 
 </div>
 
-<div class="main">
+<div class="menu">
 
-<h1>📊 Reports & Analytics</h1>
-
-<br>
-
-<div class="cards">
-
-<div class="card">
-<h3>Total Trips</h3>
-<h1>1,245</h1>
-</div>
-
-<div class="card">
-<h3>Fleet Utilization</h3>
-<h1>84%</h1>
-</div>
-
-<div class="card">
-<h3>Fuel Cost</h3>
-<h1>₹5.2L</h1>
-</div>
-
-<div class="card">
-<h3>Maintenance Cost</h3>
-<h1>₹1.8L</h1>
-</div>
-
-</div>
-
-<div class="chart-grid">
-
-<div class="chart-box">
-
-<h3>Monthly Trips</h3>
-
-<canvas id="tripChart"></canvas>
-
-</div>
-
-<div class="chart-box">
-
-<h3>Fuel Consumption</h3>
-
-<canvas id="fuelChart"></canvas>
-
-</div>
-
-<div class="chart-box">
-
-<h3>Expense Distribution</h3>
-
-<canvas id="expenseChart"></canvas>
-
-</div>
-
-<div class="chart-box">
-
-<h3>Vehicle Status</h3>
-
-<canvas id="statusChart"></canvas>
-
-</div>
-
-</div>
-
-<div class="download">
-
-<button onclick="downloadReport()">
-
-📄 Download Report
-
+<button onclick="window.location.href='dashboard.html'">
+📊 Dashboard
 </button>
 
-</div>
+<button onclick="window.location.href='vehicle registry.html'">
+🚍 Vehicle Registry
+</button>
+
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='driverprofile.html'">
+👨‍✈️ Driver Profiles
+</button>
+
+<button onclick="window.location.href='trip dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
+
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
+
+<button onclick="window.location.href='fuel expenses.html'">
+⛽ Fuel & Expenses
+</button>
+
+<button onclick="window.location.href='reports.html'">
+📈 Reports
+</button>
+
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
+</button>
 
 </div>
 

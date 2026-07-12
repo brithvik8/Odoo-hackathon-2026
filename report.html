@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TransitOps Reports & Analytics</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+}
+
+.sidebar{
+position:fixed;
+width:240px;
+height:100vh;
+background:#111827;
+padding:20px;
+}
+
+.sidebar h2{
+text-align:center;
+color:#00E5A8;
+margin-bottom:25px;
+}
+
+.sidebar button{
+width:100%;
+padding:14px;
+margin:8px 0;
+background:#1f2937;
+color:white;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+.sidebar button:hover{
+background:#00E5A8;
+color:black;
+}
+
+.main{
+margin-left:260px;
+padding:30px;
+}
+
+.cards{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:20px;
+margin-bottom:30px;
+}
+
+.card{
+background:#1e293b;
+padding:20px;
+border-radius:15px;
+text-align:center;
+box-shadow:0 8px 20px rgba(0,0,0,.3);
+}
+
+.card h3{
+color:#cbd5e1;
+}
+
+.card h1{
+margin-top:10px;
+color:#00E5A8;
+}
+
+.chart-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:25px;
+}
+
+.chart-box{
+background:#1e293b;
+padding:20px;
+border-radius:20px;
+}
+
+canvas{
+background:white;
+border-radius:10px;
+padding:10px;
+}
+
+.download{
+margin-top:30px;
+text-align:center;
+}
+
+.download button{
+padding:15px 35px;
+background:#00E5A8;
+border:none;
+border-radius:12px;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.download button:hover{
+background:#00c58d;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+
+<div class="logo">
+
+<h1>🚍</h1>
+
+<h2>TransitOps</h2>
+
+</div>
+
+
+
+<div class="menu">
+
+<button onclick="window.location.href='dashboard.html'">
+📊 Dashboard
+</button>
+
+<button onclick="window.location.href='vehicle_reg.html'">
+🚍 Vehicle Registry
+</button>
+
+<button onclick="window.location.href='drivers_profile.html'">
+👨‍✈️ Driver Profiles
+</button>
+
+<button onclick="window.location.href='trip_dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
+
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
+
+<button onclick="window.location.href='fuel_expenses.html'">
+⛽ Fuel & Expenses
+</button>
+
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='report.html'">
+📈 Reports
+</button>
+
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
+</button>
+
+</div>
+
+</div>
+
+
+
+<div class="main">
+
+<h1>📊 Reports & Analytics</h1>
+
+<br>
+
+<div class="cards">
+
+<div class="card">
+<h3>Total Trips</h3>
+<h1>1,245</h1>
+</div>
+
+<div class="card">
+<h3>Fleet Utilization</h3>
+<h1>84%</h1>
+</div>
+
+<div class="card">
+<h3>Fuel Cost</h3>
+<h1>₹5.2L</h1>
+</div>
+
+<div class="card">
+<h3>Maintenance Cost</h3>
+<h1>₹1.8L</h1>
+</div>
+
+</div>
+
+<div class="chart-grid">
+
+<div class="chart-box">
+
+<h3>Monthly Trips</h3>
+
+<canvas id="tripChart"></canvas>
+
+</div>
+
+<div class="chart-box">
+
+<h3>Fuel Consumption</h3>
+
+<canvas id="fuelChart"></canvas>
+
+</div>
+
+<div class="chart-box">
+
+<h3>Expense Distribution</h3>
+
+<canvas id="expenseChart"></canvas>
+
+</div>
+
+<div class="chart-box">
+
+<h3>Vehicle Status</h3>
+
+<canvas id="statusChart"></canvas>
+
+</div>
+
+</div>
+
+<div class="download">
+
+<button onclick="downloadReport()">
+
+📄 Download Report
+
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+new Chart(document.getElementById("tripChart"),{
+
+type:'bar',
+
+data:{
+
+labels:["Jan","Feb","Mar","Apr","May","Jun"],
+
+datasets:[{
+
+label:"Trips",
+
+data:[180,220,240,260,210,300],
+
+backgroundColor:"#2563eb"
+
+}]
+
+}
+
+});
+
+new Chart(document.getElementById("fuelChart"),{
+
+type:'line',
+
+data:{
+
+labels:["Jan","Feb","Mar","Apr","May","Jun"],
+
+datasets:[{
+
+label:"Fuel (L)",
+
+data:[4500,5200,4800,5600,5900,6100],
+
+borderColor:"#16a34a",
+
+fill:false
+
+}]
+
+}
+
+});
+
+new Chart(document.getElementById("expenseChart"),{
+
+type:'pie',
+
+data:{
+
+labels:["Fuel","Maintenance","Salary","Toll"],
+
+datasets:[{
+
+data:[45,20,25,10],
+
+backgroundColor:["#3b82f6","#22c55e","#f59e0b","#ef4444"]
+
+}]
+
+}
+
+});
+
+new Chart(document.getElementById("statusChart"),{
+
+type:'doughnut',
+
+data:{
+
+labels:["Active","Maintenance","Idle"],
+
+datasets:[{
+
+data:[70,15,15],
+
+backgroundColor:["#22c55e","#ef4444","#3b82f6"]
+
+}]
+
+}
+
+});
+
+function downloadReport(){
+
+alert("TransitOps Report Generated Successfully!");
+
+}
+
+</script>
+
+</body>
+</html>

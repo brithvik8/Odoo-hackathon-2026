@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TransitOps - Maintenance</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+}
+
+/* Sidebar */
+
+.sidebar{
+
+position:fixed;
+
+left:0;
+
+top:0;
+
+width:250px;
+
+height:100vh;
+
+background:#111827;
+
+padding:20px;
+
+}
+
+.sidebar h2{
+
+color:#00d4ff;
+
+margin-bottom:30px;
+
+}
+
+.sidebar a{
+
+display:block;
+
+color:white;
+
+text-decoration:none;
+
+padding:12px;
+
+margin:8px 0;
+
+border-radius:10px;
+
+transition:.3s;
+
+}
+
+.sidebar a:hover{
+
+background:#00d4ff;
+
+color:#111827;
+
+}
+
+/* Main */
+
+.main{
+
+margin-left:250px;
+
+padding:30px;
+
+}
+
+/* Cards */
+
+.cards{
+
+display:grid;
+
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+
+gap:20px;
+
+margin-bottom:30px;
+
+}
+
+.card{
+
+background:#1e293b;
+
+padding:25px;
+
+border-radius:20px;
+
+box-shadow:0 8px 20px rgba(0,0,0,.4);
+
+}
+
+.card h3{
+
+color:#94a3b8;
+
+}
+
+.card h1{
+
+margin-top:15px;
+
+color:#00d4ff;
+
+}
+
+/* Form */
+
+.form{
+
+background:#1e293b;
+
+padding:25px;
+
+border-radius:20px;
+
+margin-bottom:30px;
+
+}
+
+.form input,
+.form select{
+
+width:100%;
+
+padding:12px;
+
+margin:10px 0;
+
+border:none;
+
+border-radius:10px;
+
+font-size:15px;
+
+}
+
+button{
+
+background:#00d4ff;
+
+color:#111827;
+
+padding:12px 20px;
+
+border:none;
+
+border-radius:10px;
+
+cursor:pointer;
+
+font-weight:bold;
+
+}
+
+button:hover{
+
+background:#22c55e;
+
+}
+
+/* Table */
+
+table{
+
+width:100%;
+
+border-collapse:collapse;
+
+background:#1e293b;
+
+border-radius:20px;
+
+overflow:hidden;
+
+}
+
+th{
+
+background:#2563eb;
+
+padding:15px;
+
+}
+
+td{
+
+padding:15px;
+
+text-align:center;
+
+border-bottom:1px solid #334155;
+
+}
+
+.status1{
+
+color:#22c55e;
+
+font-weight:bold;
+
+}
+
+.status2{
+
+color:#f59e0b;
+
+font-weight:bold;
+
+}
+
+.status3{
+
+color:#ef4444;
+
+font-weight:bold;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>🚍 TransitOps</h2>
+
+<a href="dashboard.html">📊 Dashboard</a>
+<a href="vehicle_reg.html">🚚 Vehicle Registry</a>
+<a href="drivers_profile.html">👨‍✈ Driver Profiles</a>
+<a href="trip_dispatcher.html">🛣 Trip Dispatcher</a>
+<a href="maintenance.html" style="background:#00d4ff;color:black;">🔧 Maintenance</a>
+<a href="fuel_expenses.html">⛽ Fuel & Expenses</a>
+<a href="report.html">📈 Reports</a>
+<a href="settings.html">⚙ Settings</a>
+
+</div>
+
+<div class="main">
+
+<h1>🔧 Maintenance Management</h1>
+
+<br>
+
+<div class="cards">
+
+<div class="card">
+
+<h3>Vehicles in Service</h3>
+
+<h1>12</h1>
+
+</div>
+
+<div class="card">
+
+<h3>Upcoming Services</h3>
+
+<h1>18</h1>
+
+</div>
+
+<div class="card">
+
+<h3>Emergency Repairs</h3>
+
+<h1>4</h1>
+
+</div>
+
+<div class="card">
+
+<h3>Monthly Cost</h3>
+
+<h1>₹2.45 L</h1>
+
+</div>
+
+</div>
+
+<div class="form">
+
+<h2>Add Maintenance Record</h2>
+
+<input id="reg" placeholder="Vehicle Registration (TS08HK2058)">
+
+<input id="issue" placeholder="Issue">
+
+<input id="cost" placeholder="Estimated Cost">
+
+<select id="status">
+
+<option>Scheduled</option>
+
+<option>In Progress</option>
+
+<option>Completed</option>
+
+</select>
+
+<button onclick="addMaintenance()">
+
+Save Record
+
+</button>
+
+</div>
+
+<table id="table">
+
+<tr>
+
+<th>Vehicle</th>
+
+<th>Issue</th>
+
+<th>Cost</th>
+
+<th>Status</th>
+
+</tr>
+
+<tr>
+
+<td>TS08HK2058</td>
+
+<td>Brake Replacement</td>
+
+<td>₹18,000</td>
+
+<td class="status2">In Progress</td>
+
+</tr>
+
+<tr>
+
+<td>AP09XY4521</td>
+
+<td>Oil Change</td>
+
+<td>₹4,500</td>
+
+<td class="status1">Completed</td>
+
+</tr>
+
+</table>
+
+</div>
+
+<script>
+
+function addMaintenance(){
+
+let reg=document.getElementById("reg").value;
+
+let issue=document.getElementById("issue").value;
+
+let cost=document.getElementById("cost").value;
+
+let status=document.getElementById("status").value;
+
+if(reg==""||issue==""||cost==""){
+
+alert("Please fill all fields");
+
+return;
+
+}
+
+let table=document.getElementById("table");
+
+let row=table.insertRow(-1);
+
+row.insertCell(0).innerHTML=reg;
+
+row.insertCell(1).innerHTML=issue;
+
+row.insertCell(2).innerHTML="₹"+cost;
+
+row.insertCell(3).innerHTML=status;
+
+document.getElementById("reg").value="";
+document.getElementById("issue").value="";
+document.getElementById("cost").value="";
+
+alert("Maintenance Record Added Successfully!");
+
+}
+
+</script>
+
+</body>
+</html>

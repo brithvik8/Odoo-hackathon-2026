@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TransitOps | Trip Dispatcher</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Segoe UI,sans-serif;
+}
+
+body{
+
+background:#0f172a;
+color:white;
+
+}
+
+.sidebar{
+
+position:fixed;
+width:240px;
+height:100vh;
+background:#111827;
+padding:25px;
+
+}
+
+.sidebar h2{
+
+text-align:center;
+color:#00E5A8;
+margin-bottom:30px;
+
+}
+
+.sidebar button{
+
+width:100%;
+padding:14px;
+margin:8px 0;
+border:none;
+border-radius:10px;
+background:#1f2937;
+color:white;
+cursor:pointer;
+
+}
+
+.sidebar button:hover{
+
+background:#00E5A8;
+color:black;
+
+}
+
+.main{
+
+margin-left:260px;
+padding:30px;
+
+}
+
+.header{
+
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:25px;
+
+}
+
+.container{
+
+background:#1e293b;
+padding:30px;
+border-radius:20px;
+
+}
+
+.grid{
+
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+
+}
+
+label{
+
+font-weight:bold;
+display:block;
+margin-bottom:6px;
+
+}
+
+input,select{
+
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+font-size:15px;
+
+}
+
+button.dispatch{
+
+margin-top:30px;
+width:100%;
+padding:15px;
+font-size:18px;
+background:#00E5A8;
+color:black;
+border:none;
+border-radius:15px;
+cursor:pointer;
+font-weight:bold;
+
+}
+
+button.dispatch:hover{
+
+background:#00c58d;
+
+}
+
+.result{
+
+margin-top:25px;
+padding:20px;
+background:#0f172a;
+border-radius:15px;
+
+}
+
+.success{
+
+color:#00E676;
+font-size:18px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+
+<div class="logo">
+
+<h1>🚍</h1>
+
+<h2>TransitOps</h2>
+
+</div>
+
+
+
+<div class="menu">
+
+<button onclick="window.location.href='dashboard.html'">
+📊 Dashboard
+</button>
+
+<button onclick="window.location.href='vehicle_reg.html'">
+🚍 Vehicle Registry
+</button>
+
+<button onclick="window.location.href='drivers_profile.html'">
+👨‍✈️ Driver Profiles
+</button>
+
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='trip_dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
+
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
+
+<button onclick="window.location.href='fuel_expenses.html'">
+⛽ Fuel & Expenses
+</button>
+
+<button onclick="window.location.href='report.html'">
+📈 Reports
+</button>
+
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
+</button>
+
+</div>
+
+</div>
+
+
+
+<div class="main">
+
+<div class="header">
+
+<h1>Trip Dispatcher</h1>
+
+<h3>Today's Trips</h3>
+
+</div>
+
+<div class="container">
+
+<div class="grid">
+
+<div>
+
+<label>Vehicle</label>
+
+<select id="vehicle">
+
+<option>TS08HK2058</option>
+<option>TS09AB4567</option>
+<option>AP05XY7890</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Driver</label>
+
+<select id="driver">
+
+<option>Ramesh Kumar</option>
+<option>Suresh</option>
+<option>Mahesh</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Source</label>
+
+<input id="source" placeholder="Hyderabad">
+
+</div>
+
+<div>
+
+<label>Destination</label>
+
+<input id="destination" placeholder="Vijayawada">
+
+</div>
+
+<div>
+
+<label>Cargo Type</label>
+
+<select id="cargo">
+
+<option>Passengers</option>
+<option>Food</option>
+<option>Electronics</option>
+<option>Medical Supplies</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Cargo Weight (kg)</label>
+
+<input id="weight" type="number">
+
+</div>
+
+<div>
+
+<label>Trip Date</label>
+
+<input type="date" id="date">
+
+</div>
+
+<div>
+
+<label>Departure Time</label>
+
+<input type="time" id="time">
+
+</div>
+
+</div>
+
+<button class="dispatch" onclick="dispatchTrip()">
+
+🚀 Dispatch Trip
+
+</button>
+
+<div class="result" id="result">
+
+Waiting for Trip Dispatch...
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function dispatchTrip(){
+
+let vehicle=document.getElementById("vehicle").value;
+let driver=document.getElementById("driver").value;
+let source=document.getElementById("source").value;
+let destination=document.getElementById("destination").value;
+let cargo=document.getElementById("cargo").value;
+let weight=parseInt(document.getElementById("weight").value);
+
+if(source==""||destination==""){
+
+alert("Enter source and destination");
+
+return;
+
+}
+
+if(weight>5000){
+
+alert("Vehicle Capacity Exceeded!");
+
+return;
+
+}
+
+let distance=Math.floor(Math.random()*400)+100;
+
+let eta=Math.floor(distance/50);
+
+document.getElementById("result").innerHTML=`
+
+<h2 class="success">✅ Trip Successfully Dispatched</h2>
+
+<br>
+
+<b>Vehicle :</b> ${vehicle}<br><br>
+
+<b>Driver :</b> ${driver}<br><br>
+
+<b>Route :</b> ${source} ➜ ${destination}<br><br>
+
+<b>Cargo :</b> ${cargo}<br><br>
+
+<b>Weight :</b> ${weight} kg<br><br>
+
+<b>Distance :</b> ${distance} km<br><br>
+
+<b>Estimated Travel Time :</b> ${eta} Hours<br><br>
+
+<b>Status :</b> <span style="color:#00E676;">Dispatched</span>
+
+`;
+
+}
+
+</script>
+
+</body>
+</html>

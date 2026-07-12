@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>TransitOps India Map</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+
+<!-- Leaflet Map Library -->
+
+<link rel="stylesheet"
+href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+
+
+
+<style>
+
+
+body{
+
+margin:0;
+
+font-family:Segoe UI;
+
+background:#0f2027;
+
+color:white;
+
+}
+
+
+
+.header{
+
+padding:20px;
+
+text-align:center;
+
+background:#00c6ff;
+
+color:#003333;
+
+}
+
+
+
+.controls{
+
+padding:20px;
+
+background:#203a43;
+
+}
+
+
+
+input{
+
+padding:12px;
+
+width:250px;
+
+border-radius:10px;
+
+border:none;
+
+}
+
+
+
+button{
+
+padding:12px 20px;
+
+border:none;
+
+border-radius:20px;
+
+background:#00ffcc;
+
+font-weight:bold;
+
+cursor:pointer;
+
+}
+
+
+
+#map{
+
+height:600px;
+
+width:100%;
+
+}
+
+
+
+.info{
+
+padding:15px;
+
+background:#111;
+
+}
+
+
+
+.highlight{
+
+color:#00ffcc;
+
+font-weight:bold;
+
+}
+
+
+
+</style>
+
+
+</head>
+
+
+
+<body>
+
+
+
+<div class="header">
+
+<h1>🚍 TransitOps</h1>
+
+<p>India Smart Transport Map</p>
+
+</div>
+
+
+
+<div class="controls">
+
+
+<input id="vehicle"
+placeholder="Enter Vehicle No"
+value="TS 08 HK 2058">
+
+
+<button onclick="trackVehicle()">
+
+Track Vehicle
+
+</button>
+
+
+</div>
+
+
+
+
+<div id="map"></div>
+
+
+
+<div class="info" id="info">
+
+Waiting for vehicle...
+
+</div>
+
+
+
+
+
+
+<script>
+
+
+
+// Create India map
+
+
+let map =
+L.map('map')
+.setView(
+[22.5937,78.9629],
+5
+);
+
+
+
+
+// OpenStreetMap layer
+
+
+L.tileLayer(
+
+'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+{
+
+maxZoom:19,
+
+}
+
+).addTo(map);
+
+
+
+
+
+// Vehicle starting location Hyderabad
+
+
+let lat=17.3850;
+
+let lng=78.4867;
+
+
+
+let marker;
+
+
+
+function trackVehicle(){
+
+
+let vehicle =
+document.getElementById("vehicle").value;
+
+
+
+if(marker){
+
+map.removeLayer(marker);
+
+}
+
+
+
+// create marker
+
+
+marker =
+L.marker([lat,lng])
+.addTo(map);
+
+
+
+marker.bindPopup(
+
+`
+<b>🚌 ${vehicle}</b>
+<br>
+Location:
+Hyderabad
+<br>
+Status:
+Running
+`
+
+).openPopup();
+
+
+
+map.setView(
+[lat,lng],
+12
+);
+
+
+
+
+document.getElementById("info")
+.innerHTML=`
+
+Vehicle:
+
+<span class="highlight">
+${vehicle}
+</span>
+
+<br>
+
+Current Location:
+
+<span class="highlight">
+Hyderabad, Telangana
+</span>
+
+
+<br>
+
+Speed:
+
+<span class="highlight">
+45 km/hr
+</span>
+
+
+<br>
+
+Status:
+
+<span class="highlight">
+Active
+</span>
+
+`;
+
+
+
+}
+
+
+
+// simulate movement
+
+
+setInterval(()=>{
+
+
+if(marker){
+
+
+lat +=0.001;
+
+lng +=0.001;
+
+
+marker.setLatLng(
+[lat,lng]
+);
+
+
+}
+
+
+},3000);
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

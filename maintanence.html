@@ -248,129 +248,52 @@ font-weight:bold;
 
 <h2>🚍 TransitOps</h2>
 
-<a href="#">📊 Dashboard</a>
-<a href="#">🚚 Vehicle Registry</a>
-<a href="#">👨‍✈ Driver Profiles</a>
-<a href="#">🛣 Trip Dispatcher</a>
-<a href="#" style="background:#00d4ff;color:black;">🔧 Maintenance</a>
-<a href="#">⛽ Fuel & Expenses</a>
-<a href="#">📈 Reports</a>
-<a href="#">⚙ Settings</a>
+<a href="# Dashboard.html">📊 Dashboard</a>
+<a href="# vehicle registry.html">🚚 Vehicle Registry</a>
+<a href="# driverprofile.html">👨‍✈ Driver Profiles</a>
+<a href="# trip dispatcher.html">🛣 Trip Dispatcher</a>
+<a href="# maintenance.html" style="background:#00d4ff;color:black;">🔧 Maintenance</a>
+<a href="# fuel expenses.html">⛽ Fuel & Expenses</a>
+<a href="# reports.html">📈 Reports</a>
+<a href="# settings.html">⚙ Settings</a>
 
 </div>
 
-<div class="main">
+<div class="menu">
 
-<h1>🔧 Maintenance Management</h1>
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='dashboard.html'">
+📊 Dashboard
+</button>
 
-<br>
+<button onclick="window.location.href='vehicle registry.html'">
+🚍 Vehicle Registry
+</button>
 
-<div class="cards">
+<button onclick="window.location.href='driverprofile.html'">
+👨‍✈️ Driver Profiles
+</button>
 
-<div class="card">
+<button onclick="window.location.href='trip dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
 
-<h3>Vehicles in Service</h3>
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
 
-<h1>12</h1>
+<button onclick="window.location.href='fuel expenses.html'">
+⛽ Fuel & Expenses
+</button>
 
-</div>
+<button onclick="window.location.href='reports.html'">
+📈 Reports
+</button>
 
-<div class="card">
-
-<h3>Upcoming Services</h3>
-
-<h1>18</h1>
-
-</div>
-
-<div class="card">
-
-<h3>Emergency Repairs</h3>
-
-<h1>4</h1>
-
-</div>
-
-<div class="card">
-
-<h3>Monthly Cost</h3>
-
-<h1>₹2.45 L</h1>
-
-</div>
-
-</div>
-
-<div class="form">
-
-<h2>Add Maintenance Record</h2>
-
-<input id="reg" placeholder="Vehicle Registration (TS08HK2058)">
-
-<input id="issue" placeholder="Issue">
-
-<input id="cost" placeholder="Estimated Cost">
-
-<select id="status">
-
-<option>Scheduled</option>
-
-<option>In Progress</option>
-
-<option>Completed</option>
-
-</select>
-
-<button onclick="addMaintenance()">
-
-Save Record
-
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
 </button>
 
 </div>
-
-<table id="table">
-
-<tr>
-
-<th>Vehicle</th>
-
-<th>Issue</th>
-
-<th>Cost</th>
-
-<th>Status</th>
-
-</tr>
-
-<tr>
-
-<td>TS08HK2058</td>
-
-<td>Brake Replacement</td>
-
-<td>₹18,000</td>
-
-<td class="status2">In Progress</td>
-
-</tr>
-
-<tr>
-
-<td>AP09XY4521</td>
-
-<td>Oil Change</td>
-
-<td>₹4,500</td>
-
-<td class="status1">Completed</td>
-
-</tr>
-
-</table>
-
-</div>
-
 <script>
 
 function addMaintenance(){

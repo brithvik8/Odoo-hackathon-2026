@@ -159,145 +159,43 @@ border-radius:15px;
 
 </div>
 
-<div class="main">
+<div class="menu">
 
-<h1>Fuel & Expense Management</h1>
-
-<br>
-
-<div class="cards">
-
-<div class="card">
-<h3>Total Fuel Cost</h3>
-<h1>₹2,45,000</h1>
-</div>
-
-<div class="card">
-<h3>Total Expenses</h3>
-<h1>₹3,18,000</h1>
-</div>
-
-<div class="card">
-<h3>Average Mileage</h3>
-<h1>8.6 km/L</h1>
-</div>
-
-<div class="card">
-<h3>Monthly Budget</h3>
-<h1>78%</h1>
-</div>
-
-</div>
-
-<div class="form">
-
-<div class="grid">
-
-<div>
-
-<label>Vehicle Number</label>
-
-<select id="vehicle">
-<option>TS08HK2058</option>
-<option>TS09AB4567</option>
-<option>AP05XY7890</option>
-</select>
-
-</div>
-
-<div>
-
-<label>Fuel Type</label>
-
-<select id="fuel">
-<option>Diesel</option>
-<option>Petrol</option>
-<option>CNG</option>
-</select>
-
-</div>
-
-<div>
-
-<label>Fuel Quantity (Litres)</label>
-
-<input type="number" id="litres">
-
-</div>
-
-<div>
-
-<label>Fuel Price / Litre (₹)</label>
-
-<input type="number" id="price">
-
-</div>
-
-<div>
-
-<label>Trip Distance (KM)</label>
-
-<input type="number" id="distance">
-
-</div>
-
-<div>
-
-<label>Other Expense (₹)</label>
-
-<input type="number" id="expense">
-
-</div>
-
-</div>
-
-<button class="save" onclick="calculate()">
-
-💾 Save Expense
-
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='dashboard.html'">
+📊 Dashboard
 </button>
 
-<div class="result" id="result">
+<button onclick="window.location.href='vehicle registry.html'">
+🚍 Vehicle Registry
+</button>
 
-Waiting for Data...
+<button onclick="window.location.href='driverprofile.html'">
+👨‍✈️ Driver Profiles
+</button>
 
-</div>
+<button onclick="window.location.href='trip dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
 
-<table>
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
 
-<tr>
+<button onclick="window.location.href='fuel expenses.html'">
+⛽ Fuel & Expenses
+</button>
 
-<th>Vehicle</th>
-<th>Fuel Cost</th>
-<th>Other Expense</th>
-<th>Total Cost</th>
+<button onclick="window.location.href='reports.html'">
+📈 Reports
+</button>
 
-</tr>
-
-<tr>
-
-<td>TS08HK2058</td>
-<td>₹18,200</td>
-<td>₹2,300</td>
-<td>₹20,500</td>
-
-</tr>
-
-<tr>
-
-<td>AP05XY7890</td>
-<td>₹11,800</td>
-<td>₹1,100</td>
-<td>₹12,900</td>
-
-</tr>
-
-</table>
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
+</button>
 
 </div>
 
 </div>
-
 <script>
 
 function calculate(){

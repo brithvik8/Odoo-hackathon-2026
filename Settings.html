@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TransitOps | Settings</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:'Segoe UI',sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+}
+
+.sidebar{
+position:fixed;
+width:240px;
+height:100vh;
+background:#111827;
+padding:20px;
+}
+
+.sidebar h2{
+text-align:center;
+color:#00E5A8;
+margin-bottom:25px;
+}
+
+.sidebar button{
+width:100%;
+padding:14px;
+margin:8px 0;
+border:none;
+border-radius:10px;
+background:#1f2937;
+color:white;
+cursor:pointer;
+}
+
+.sidebar button:hover{
+background:#00E5A8;
+color:black;
+}
+
+.main{
+margin-left:260px;
+padding:30px;
+}
+
+.container{
+background:#1e293b;
+padding:30px;
+border-radius:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+}
+
+label{
+display:block;
+margin-bottom:6px;
+font-weight:bold;
+}
+
+input,select{
+width:100%;
+padding:12px;
+border:none;
+border-radius:10px;
+font-size:15px;
+}
+
+.permissions{
+margin-top:30px;
+background:#0f172a;
+padding:20px;
+border-radius:15px;
+}
+
+.permissions table{
+width:100%;
+border-collapse:collapse;
+margin-top:15px;
+}
+
+.permissions th{
+background:#00E5A8;
+color:black;
+padding:12px;
+}
+
+.permissions td{
+padding:12px;
+border-bottom:1px solid #334155;
+text-align:center;
+}
+
+.switch{
+display:flex;
+align-items:center;
+margin-top:15px;
+gap:10px;
+}
+
+button.save{
+margin-top:30px;
+width:100%;
+padding:15px;
+border:none;
+border-radius:15px;
+background:#00E5A8;
+font-size:18px;
+font-weight:bold;
+cursor:pointer;
+}
+
+button.save:hover{
+background:#00c58d;
+}
+
+.success{
+margin-top:20px;
+padding:15px;
+background:#064e3b;
+border-radius:10px;
+display:none;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<h2>🚍 TransitOps</h2>
+
+<button>Dashboard</button>
+<button>Vehicle Registry</button>
+<button>Drivers</button>
+<button>Trip Dispatcher</button>
+<button>Maintenance</button>
+<button>Fuel & Expenses</button>
+<button>Reports</button>
+<button style="background:#00E5A8;color:black;">Settings</button>
+
+</div>
+
+<div class="main">
+
+<h1>⚙ Settings & RBAC</h1>
+
+<br>
+
+<div class="container">
+
+<div class="grid">
+
+<div>
+
+<label>Full Name</label>
+
+<input type="text" value="Harsha">
+
+</div>
+
+<div>
+
+<label>Email</label>
+
+<input type="email" value="manager@transitops.com">
+
+</div>
+
+<div>
+
+<label>Role</label>
+
+<select id="role" onchange="updatePermissions()">
+
+<option>Fleet Manager</option>
+<option>Dispatcher</option>
+<option>Safety Officer</option>
+<option>Financial Analyst</option>
+
+</select>
+
+</div>
+
+<div>
+
+<label>Change Password</label>
+
+<input type="password" placeholder="New Password">
+
+</div>
+
+</div>
+
+<div class="switch">
+
+<input type="checkbox" checked>
+
+<label>Email Notifications</label>
+
+</div>
+
+<div class="switch">
+
+<input type="checkbox">
+
+<label>SMS Notifications</label>
+
+</div>
+
+<div class="switch">
+
+<input type="checkbox">
+
+<label>Enable Two-Factor Authentication</label>
+
+</div>
+
+<div class="permissions">
+
+<h2>Role Permissions</h2>
+
+<table>
+
+<tr>
+
+<th>Module</th>
+<th>Access</th>
+
+</tr>
+
+<tbody id="permissionTable">
+
+</tbody>
+
+</table>
+
+</div>
+
+<button class="save" onclick="saveSettings()">
+
+💾 Save Settings
+
+</button>
+
+<div class="success" id="success">
+
+✅ Settings Saved Successfully
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+const permissions={
+
+"Fleet Manager":[
+["Dashboard","✅"],
+["Vehicle Registry","✅"],
+["Driver Profiles","✅"],
+["Trip Dispatcher","✅"],
+["Maintenance","✅"],
+["Fuel & Expenses","✅"],
+["Reports","✅"],
+["Settings","✅"]
+],
+
+"Dispatcher":[
+["Dashboard","✅"],
+["Vehicle Registry","✅"],
+["Driver Profiles","✅"],
+["Trip Dispatcher","✅"],
+["Maintenance","❌"],
+["Fuel & Expenses","❌"],
+["Reports","❌"],
+["Settings","✅"]
+],
+
+"Safety Officer":[
+["Dashboard","✅"],
+["Vehicle Registry","✅"],
+["Driver Profiles","✅"],
+["Trip Dispatcher","✅"],
+["Maintenance","✅"],
+["Fuel & Expenses","❌"],
+["Reports","❌"],
+["Settings","✅"]
+],
+
+"Financial Analyst":[
+["Dashboard","✅"],
+["Vehicle Registry","✅"],
+["Driver Profiles","❌"],
+["Trip Dispatcher","❌"],
+["Maintenance","✅"],
+["Fuel & Expenses","✅"],
+["Reports","✅"],
+["Settings","✅"]
+]
+
+};
+
+function updatePermissions(){
+
+let role=document.getElementById("role").value;
+
+let table=document.getElementById("permissionTable");
+
+table.innerHTML="";
+
+permissions[role].forEach(function(item){
+
+table.innerHTML+=`
+<tr>
+<td>${item[0]}</td>
+<td>${item[1]}</td>
+</tr>
+`;
+
+});
+
+}
+
+updatePermissions();
+
+function saveSettings(){
+
+document.getElementById("success").style.display="block";
+
+setTimeout(function(){
+
+document.getElementById("success").style.display="none";
+
+},3000);
+
+}
+
+</script>
+
+</body>
+</html>

@@ -159,116 +159,41 @@ display:none;
 
 </div>
 
-<div class="main">
+<div class="menu">
 
-<h1>⚙ Settings & RBAC</h1>
-
-<br>
-
-<div class="container">
-
-<div class="grid">
-
-<div>
-
-<label>Full Name</label>
-
-<input type="text" value="Harsha">
-
-</div>
-
-<div>
-
-<label>Email</label>
-
-<input type="email" value="manager@transitops.com">
-
-</div>
-
-<div>
-
-<label>Role</label>
-
-<select id="role" onchange="updatePermissions()">
-
-<option>Fleet Manager</option>
-<option>Dispatcher</option>
-<option>Safety Officer</option>
-<option>Financial Analyst</option>
-
-</select>
-
-</div>
-
-<div>
-
-<label>Change Password</label>
-
-<input type="password" placeholder="New Password">
-
-</div>
-
-</div>
-
-<div class="switch">
-
-<input type="checkbox" checked>
-
-<label>Email Notifications</label>
-
-</div>
-
-<div class="switch">
-
-<input type="checkbox">
-
-<label>SMS Notifications</label>
-
-</div>
-
-<div class="switch">
-
-<input type="checkbox">
-
-<label>Enable Two-Factor Authentication</label>
-
-</div>
-
-<div class="permissions">
-
-<h2>Role Permissions</h2>
-
-<table>
-
-<tr>
-
-<th>Module</th>
-<th>Access</th>
-
-</tr>
-
-<tbody id="permissionTable">
-
-</tbody>
-
-</table>
-
-</div>
-
-<button class="save" onclick="saveSettings()">
-
-💾 Save Settings
-
+<button onclick="window.location.href='dashboard.html'">
+📊 Dashboard
 </button>
 
-<div class="success" id="success">
+<button onclick="window.location.href='vehicle registry.html'">
+🚍 Vehicle Registry
+</button>
 
-✅ Settings Saved Successfully
+<button style="background:#00ffcc;color:black;" onclick="window.location.href='driverprofile.html'">
+👨‍✈️ Driver Profiles
+</button>
+
+<button onclick="window.location.href='trip dispatcher.html'">
+🗺 Trip Dispatcher
+</button>
+
+<button onclick="window.location.href='maintenance.html'">
+🔧 Maintenance
+</button>
+
+<button onclick="window.location.href='fuel expenses.html'">
+⛽ Fuel & Expenses
+</button>
+
+<button onclick="window.location.href='reports.html'">
+📈 Reports
+</button>
+
+<button onclick="window.location.href='settings.html'">
+⚙ Settings
+</button>
 
 </div>
-
-</div>
-
 </div>
 
 <script>

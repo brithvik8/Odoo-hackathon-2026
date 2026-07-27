@@ -287,6 +287,7 @@ Smart Transport Operations Platform
 
 
 
+<div id="loginForm">
 <label>Email Address</label>
 
 <input id="email"
@@ -379,9 +380,64 @@ Remember me
 
 
 
-<a href="dashboard.html">
-    <button type="button">LOGIN</button>
-</a>
+<button type="button" onclick="login()">LOGIN</button>
+</div>
+
+<div id="registerForm" style="display:none;">
+<label>Register Email Address</label>
+
+<input id="registerEmail"
+placeholder="Enter email">
+
+
+
+<label>Register Password</label>
+
+
+<div class="input-box">
+
+<input id="registerPassword"
+type="password"
+placeholder="Enter password">
+
+</div>
+
+
+<label>Register Role</label>
+
+
+<select id="registerRole">
+
+
+<option>
+Fleet Manager
+</option>
+
+
+<option>
+Dispatcher
+</option>
+
+
+<option>
+Safety Officer
+</option>
+
+
+<option>
+Financial Analyst
+</option>
+
+
+</select>
+
+
+<button type="button" onclick="register()">REGISTER</button>
+</div>
+
+<div id="toggleText" style="text-align:center; margin-top:15px; font-size:13px; color:#cbd5e1;">
+    Don't have an account? <span style="color:#38bdf8; cursor:pointer; text-decoration:underline;" onclick="toggleForm('register')">Register</span>
+</div>
 
 
 
@@ -484,6 +540,43 @@ pass.type="password";
 
 
 
+// Database Initialisation
+const DEFAULT_USERS = [
+    { email: "manager@transitops.com", password: "12345", role: "Fleet Manager" },
+    { email: "dispatcher@transitops.com", password: "12345", role: "Dispatcher" }
+];
+
+function initDatabase() {
+    if (!localStorage.getItem("users")) {
+        localStorage.setItem("users", JSON.stringify(DEFAULT_USERS));
+    }
+}
+initDatabase();
+
+
+
+function toggleForm(formType) {
+    let loginForm = document.getElementById("loginForm");
+    let registerForm = document.getElementById("registerForm");
+    let toggleText = document.getElementById("toggleText");
+    let subtitle = document.querySelector(".logo p");
+    let msg = document.getElementById("message");
+
+    msg.innerHTML = "";
+
+    if (formType === "register") {
+        loginForm.style.display = "none";
+        registerForm.style.display = "block";
+        subtitle.innerHTML = "Create your TransitOps Account";
+        toggleText.innerHTML = `Already have an account? <span style="color: #38bdf8; cursor: pointer; text-decoration: underline;" onclick="toggleForm('login')">Login</span>`;
+    } else {
+        loginForm.style.display = "block";
+        registerForm.style.display = "none";
+        subtitle.innerHTML = "Smart Transport Operations Platform";
+        toggleText.innerHTML = `Don't have an account? <span style="color: #38bdf8; cursor: pointer; text-decoration: underline;" onclick="toggleForm('register')">Register</span>`;
+        generateCaptcha();
+    }
+}
 
 
 
@@ -491,7 +584,7 @@ function login(){
 
 
 let email=
-document.getElementById("email").value;
+document.getElementById("email").value.trim();
 
 
 let password=
@@ -499,7 +592,7 @@ document.getElementById("password").value;
 
 
 let captcha=
-document.getElementById("captchaInput").value;
+document.getElementById("captchaInput").value.trim();
 
 
 
@@ -543,23 +636,23 @@ return;
 
 
 
+// Database Check
+let users = JSON.parse(localStorage.getItem("users")) || DEFAULT_USERS;
+let matchedUser = users.find(u => u.email.toLowerCase() === email.toLowerCase() && u.password === password && u.role === role);
 
-// Demo authentication
-
-
-if(password==="12345"){
+if(matchedUser){
 
 
 
 localStorage.setItem(
 "user",
-email
+matchedUser.email
 );
 
 
 localStorage.setItem(
 "role",
-role
+matchedUser.role
 );
 
 
@@ -574,9 +667,10 @@ display(
 setTimeout(()=>{
 
 alert(
-"Welcome "+role+
+"Welcome "+matchedUser.role+
 "\nOpening Dashboard..."
 );
+window.location.href = "dashboard.html";
 
 
 },1000);
@@ -589,7 +683,7 @@ else{
 
 
 display(
-"Invalid Password ❌",
+"Invalid Credentials ❌",
 "red"
 );
 
@@ -601,6 +695,41 @@ display(
 }
 
 
+
+function register() {
+    let email = document.getElementById("registerEmail").value.trim();
+    let password = document.getElementById("registerPassword").value;
+    let role = document.getElementById("registerRole").value;
+
+    if (email === "" || password === "") {
+        display("Please fill in all details ❌", "red");
+        return;
+    }
+
+    if (!email.includes("@") || !email.includes(".")) {
+        display("Please enter a valid email address ❌", "red");
+        return;
+    }
+
+    let users = JSON.parse(localStorage.getItem("users")) || DEFAULT_USERS;
+
+    if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
+        display("Email already registered ❌", "red");
+        return;
+    }
+
+    users.push({ email, password, role });
+    localStorage.setItem("users", JSON.stringify(users));
+
+    display("Registration Successful! Please Login ✅", "#22c55e");
+
+    document.getElementById("registerEmail").value = "";
+    document.getElementById("registerPassword").value = "";
+
+    setTimeout(() => {
+        toggleForm('login');
+    }, 1500);
+}
 
 
 
